@@ -3,6 +3,7 @@ using CapaEntidades.Models;
 using CapaNegocio.DTOs.DTOActualizacion;
 using CapaNegocio.DTOs.DTOCreacion;
 using CapaNegocio.DTOs.DTOLectura;
+using CapaNegocio.Excepciones;
 using CapaNegocio.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -24,24 +25,41 @@ namespace CapaNegocio.Services
             throw new NotImplementedException();
         }
 
-        public Task Crear(CategoriaCreateDTO categoria)
+        public async Task Crear(CategoriaCreateDTO categoria)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(categoria.NombreCategoria))
+            {
+                throw new ValidacionException("Nombre de categoria vacio");
+            }
+
+            await _repo.Add();
+
+
         }
 
-        public Task Eliminar(int id)
+        public async Task Eliminar(int id)
         {
-            throw new NotImplementedException();
+            var categoria = await ObtenerPorId(id);
+            await _repo.Delete(categoria);
+    
         }
 
-        public Task<List<CategoriaDTO>> Listar()
+        public async Task<List<CategoriaDTO>> Listar()
         {
-            throw new NotImplementedException();
+            var categoria = await _repo.GetAll();
+            return categoria;
         }
 
-        public Task<CategoriaDTO> ObtenerPorId(int id)
+        public async Task<CategoriaDTO> ObtenerPorId(int id)
         {
-            throw new NotImplementedException();
+            var categoria = await _repo.GetById(id);
+            if (categoria == null)
+            {
+                throw new NotFoundException("Categoria no encontrada");
+            }
+
+            return categoria;
+
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CapaNegocio.Interfaces
 {
-    internal interface IPasswordHashing
+    public interface IPasswordHashing
     {
     }
 }

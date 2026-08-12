@@ -4,7 +4,8 @@ using System.Text;
 
 namespace CapaNegocio.Interfaces
 {
-    internal interface IAuth
+    public interface ITokenService
     {
+        Task<string> GenerarToken(string correo, string clave);
     }
 }

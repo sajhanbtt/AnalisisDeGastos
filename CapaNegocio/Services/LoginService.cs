@@ -6,7 +6,7 @@ using System.Text;
 
 namespace CapaNegocio.Services
 {
-    internal class LoginService : ILoginService
+    public class LoginService : ILoginService
     {
         public Task Login(string correo, string clave)
         {
