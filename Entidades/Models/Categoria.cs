@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+
+namespace CapaEntidades.Models
+{
+    public class Categoria
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string NombreCategoria { get; set; }
+
+        [StringLength(100)]
+        public string Descripcion { get; set; }
+
+        [Required]
+        public bool Activo { get; set; } = true;
+
+        [Required]
+        public int IdUsuario { get; set; }
+
+        [ForeignKey("IdUsuario")]
+        public Usuario Usuario { get; set; }
+    
+    }
+}
