@@ -8,11 +8,11 @@ using System.Text;
 
 namespace CapaDatos.Repositorios.Repositories
 {
-    public class LoginRepo : ILoginRepositorio
+    public class UsuarioRepositorio : IUsuarioRepositorio
     {
         private readonly AppDbContext _context;
 
-         public LoginRepo(AppDbContext context)
+         public UsuarioRepositorio(AppDbContext context)
         {
             _context = context;
         }

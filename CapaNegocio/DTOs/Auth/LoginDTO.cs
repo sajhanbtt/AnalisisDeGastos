@@ -11,6 +11,8 @@ namespace CapaNegocio.DTOs.Auth
         [Required]
 
         public string Email { get; set; }
+
+        [Required]
         public string Clave { get; set; }
     }
 }

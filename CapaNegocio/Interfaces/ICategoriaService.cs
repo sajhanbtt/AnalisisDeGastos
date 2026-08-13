@@ -10,14 +10,14 @@ namespace CapaNegocio.Interfaces
 {
     public interface ICategoriaService
     {
-        Task Crear(CategoriaCreateDTO categoria);
-        Task<List<CategoriaDTO>> Listar();
+        Task<CategoriaDTO> Crear(CategoriaCreateDTO categoria, int idUsuario);
+        Task<List<CategoriaDTO>> Listar(int id);
 
-        Task<CategoriaDTO> ObtenerPorId(int id);
+        Task<CategoriaDTO> ObtenerPorId(int id, int idUsuario);
 
-        Task Actualizar(int id, CategoriaUpdateDTO categoria);
+        Task Actualizar(int id, CategoriaUpdateDTO categoria, int idUsuario);
 
-        Task Eliminar(int id);
+        Task Eliminar(int id, int idUsuario);
 
     }
 }

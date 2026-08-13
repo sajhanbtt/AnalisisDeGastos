@@ -1,9 +1,11 @@
-﻿using CapaNegocio.Interfaces;
+﻿using CapaEntidades.Models;
+using CapaNegocio.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
@@ -17,30 +19,28 @@ namespace CapaNegocio.Services
         {
             _config = config;
         }
-        public async Task<string> GenerarToken(string correo, string clave)
+        public string GenerarToken(Usuario usuario)
         {
-            var key = _config["Jwt : Secret"];
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-            var credenciales = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var tokenDesc = new SecurityTokenDescriptor
+            var claims = new[]
             {
-                Subject = new System.Security.Claims.ClaimsIdentity([
 
-                    new Claim(ClaimTypes.Name, correo),
-                    new Claim(ClaimTypes.Role, "Admin")
-
-                    ]),
-                Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(_config["Jwt : TokenExpireInMinutes"])),
-                SigningCredentials = credenciales,
-                Issuer = _config["Jwt: Issuer"],
-                Audience = _config["Jwt : Audience"]
+                new Claim (ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new Claim(ClaimTypes.Email, usuario.Correo)
             };
 
-            var tokenHandler = new JsonWebTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDesc);
+            var SecretKey = _config["Jwt:SecretKey"];
+            var Issuer = _config["Jwt:Issuer"];
+            var Audience = _config["Jwt:Audience"];
 
-            return token;
+            var Expiration = int.Parse(_config["Jwt:ExpireInMinutes"]!);
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
+
+            var credenciales = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(issuer: Issuer, audience: Audience, claims: claims, expires: DateTime.UtcNow.AddMinutes(Expiration),signingCredentials: credenciales);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
 
         }
     }

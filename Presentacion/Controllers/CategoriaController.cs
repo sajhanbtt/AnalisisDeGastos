@@ -1,13 +1,17 @@
 ﻿using CapaNegocio.DTOs.DTOActualizacion;
 using CapaNegocio.DTOs.DTOCreacion;
+using CapaNegocio.Excepciones;
 using CapaNegocio.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Presentacion.Controllers
 {
     [Route("categoria")]
     [ApiController]
+    [Authorize]
     public class CategoriaController : ControllerBase
     {
         private readonly ICategoriaService _service;
@@ -17,41 +21,56 @@ namespace Presentacion.Controllers
             _service = service;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        [HttpGet("Listar")]
+        public async Task<IActionResult> Listar()
         {
-            await _service.Listar();
+            var idUsuario = ObtenerIdUsuarioActual();
+
+            var categorias = await _service.Listar(idUsuario);
+            return Ok(categorias);
+        }
+
+        [HttpPost("Crear")]
+        public async Task<IActionResult> Crear([FromBody] CategoriaCreateDTO dto)
+        {
+            var idUsuario = ObtenerIdUsuarioActual();
+
+            var categoria = await _service.Crear(dto,idUsuario);
+
+            return CreatedAtAction(nameof(ObtenerPorId), new {id = categoria.Id}, categoria);
+        }
+
+        [HttpGet("ObtenerPorId/{id}")]
+        public async Task<IActionResult> ObtenerPorId([FromRoute] int id)
+        {
+            var idUsuario = ObtenerIdUsuarioActual();
+
+            var categoria = await _service.ObtenerPorId(id, idUsuario);
+            return Ok(categoria);
+        }
+
+        [HttpPut("Actualizar/{id}")]
+        public async Task<IActionResult> Actualizar([FromRoute] int id, CategoriaUpdateDTO dto)
+        {
+            var idUsuario = ObtenerIdUsuarioActual();
+
+            await _service.Actualizar(id, dto, idUsuario);
             return Ok();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CategoriaCreateDTO dto)
+         [HttpDelete("Eliminar/{id}")]
+        public async Task<IActionResult> Eliminar([FromRoute] int id)
         {
-            await _service.Crear(dto);
-            return Created();
-        }
+            var idUsuario = ObtenerIdUsuarioActual();
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById([FromRoute] int id)
-        {
-            await _service.ObtenerPorId(id);
-            return Ok();
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromRoute] int id, CategoriaUpdateDTO dto)
-        {
-            await _service.Actualizar(id, dto);
-            return Ok();
-        }
-
-         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
-        {
-            await _service.Eliminar(id);
+            await _service.Eliminar(id, idUsuario);
             return NoContent();
         }
 
+        protected int ObtenerIdUsuarioActual()
+        {
+            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+        }
     }
 }

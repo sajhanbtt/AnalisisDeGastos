@@ -11,7 +11,7 @@ namespace CapaDatos.Repositorios.Interfaces
 
         Task Add(T model);
 
-        Task Update(int id, T model);
+        Task Update(T model);
 
         Task Delete(T model);
     }
