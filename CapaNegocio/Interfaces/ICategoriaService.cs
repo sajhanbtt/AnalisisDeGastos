@@ -15,7 +15,7 @@ namespace CapaNegocio.Interfaces
 
         Task<CategoriaDTO> ObtenerPorId(int id);
 
-        Task Actualizar(CategoriaUpdateDTO categoria);
+        Task Actualizar(int id, CategoriaUpdateDTO categoria);
 
         Task Eliminar(int id);
 

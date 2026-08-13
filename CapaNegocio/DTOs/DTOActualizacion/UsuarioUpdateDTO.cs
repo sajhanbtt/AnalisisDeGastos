@@ -7,12 +7,11 @@ namespace CapaNegocio.DTOs.DTOActualizacion
 {
     public class UsuarioUpdateDTO
     {
-      
+        [Required]
+        [StringLength(50)]
         public string Nombre { get; set; }
-
-        [EmailAddress]
-        public string Correo { get; set; }
-
+        [Required]
+        [StringLength(255)]
         public string Clave { get; set; }
     }
 }

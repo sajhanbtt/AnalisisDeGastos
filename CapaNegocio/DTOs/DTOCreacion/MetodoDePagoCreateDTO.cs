@@ -10,5 +10,7 @@ namespace CapaNegocio.DTOs.DTOCreacion
         [Required]
         public string NombreMetodo { get; set; }
         public string Descripcion { get; set; }
+
+        public string Icono { get; set; }
     }
 }

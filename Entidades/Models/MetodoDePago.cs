@@ -13,8 +13,12 @@ namespace CapaEntidades.Models
         public int Id { get; set; }
 
         [Required]
+        [StringLength(50)]
         public string NombreMetodo { get; set; }
         public string Descripcion { get; set; }
+
+        [StringLength(100)]
+        public string? Icono { get; set; }
 
         public bool Activo { get; set; } = true;
         [Required]

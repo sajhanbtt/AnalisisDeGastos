@@ -12,6 +12,8 @@ namespace CapaNegocio.DTOs.DTOCreacion
         [Required]
         public decimal Monto { get; set; }
 
+        public DateTime Fecha { get; set; } 
+
         public string Descripcion { get; set; }
 
         [Required]

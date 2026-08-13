@@ -15,6 +15,7 @@ namespace CapaEntidades.Models
         public string Nombre { get; set; }
 
         [EmailAddress]
+        [Required]
         [StringLength(50)]
         public string Correo { get; set; }
 

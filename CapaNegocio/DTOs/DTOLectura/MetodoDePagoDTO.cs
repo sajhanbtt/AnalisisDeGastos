@@ -13,6 +13,8 @@ namespace CapaNegocio.DTOs.DTOLectura
         public string NombreMetodo { get; set; }
         public string Descripcion { get; set; }
 
+        public string Icono { get; set; }
+
         public bool Activo { get; set; }
 
     }

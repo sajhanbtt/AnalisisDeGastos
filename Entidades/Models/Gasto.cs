@@ -15,7 +15,7 @@ namespace CapaEntidades.Models
         public decimal Monto { get; set; }
 
         [Required]
-        public DateTime Fecha { get; set; } = DateTime.Now;
+        public DateTime Fecha { get; set; }
 
         public string Descripcion { get; set; }
 

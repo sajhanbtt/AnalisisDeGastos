@@ -1,4 +1,7 @@
-﻿using CapaNegocio.DTOs.DTOCreacion;
+﻿using CapaEntidades.Models;
+using CapaNegocio.DTOs.Auth;
+using CapaNegocio.DTOs.DTOCreacion;
+using CapaNegocio.Excepciones;
 using CapaNegocio.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,14 +11,29 @@ namespace CapaNegocio.Services
 {
     public class LoginService : ILoginService
     {
-        public Task Login(string correo, string clave)
+        public async Task Login(LoginDTO dto)
         {
-            throw new NotImplementedException();
+            
         }
 
-        public Task Registrar(UsuarioCreateDTO usuario)
+        public Task Registrar(UsuarioCreateDTO dto)
         {
-            throw new NotImplementedException();
+            if(string.IsNullOrEmpty(dto.Nombre) || string.IsNullOrEmpty(dto.Correo) || string.IsNullOrEmpty(dto.Clave))
+            {
+                throw new ValidacionException("Datos necesarios vacios");
+            }
+
+
+
+            var user = new Usuario
+            {
+                Nombre = dto.Nombre,
+                Correo = dto.Correo,
+                Clave = dto.Clave
+
+            };
+
+
         }
     }
 }
