@@ -9,13 +9,13 @@ namespace CapaNegocio.Interfaces
 {
     public interface IMetodoPagoService
     {
-        Task Crear(MetodoDePagoCreateDTO metodoPago);
-        Task<List<PresupuestoDTO>> Listar();
+        Task<MetodoDePagoDTO> Crear(MetodoDePagoCreateDTO metodoPago, int idUsuario);
+        Task<List<MetodoDePagoDTO>> Listar(int idUsuario);
 
-        Task<PresupuestoDTO> ObtenerPorId(int id);
+        Task<MetodoDePagoDTO> ObtenerPorId(int id, int idUsuario);
 
-        Task Actualizar(MetodoDePagoUpdateDTO metodoPago);
+        Task Actualizar(int id, MetodoDePagoUpdateDTO metodoPago, int idUsuario);
 
-        Task Eliminar(int id);
+        Task Eliminar(int id, int idUsuario);
     }
 }

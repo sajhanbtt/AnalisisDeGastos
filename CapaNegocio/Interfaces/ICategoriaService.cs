@@ -17,7 +17,7 @@ namespace CapaNegocio.Interfaces
 
         Task Actualizar(int id, CategoriaUpdateDTO categoria, int idUsuario);
 
-        Task Eliminar(int id, int idUsuario);
+        Task Eliminar(int id, int idUsuario, int? idReasignacion);
 
     }
 }

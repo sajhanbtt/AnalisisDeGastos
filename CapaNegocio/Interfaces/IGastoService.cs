@@ -9,13 +9,13 @@ namespace CapaNegocio.Interfaces
 {
     public interface IGastoService
     {
-        Task Crear(GastoCreateDTO gasto);
-        Task<List<GastoDTO>> Listar();
+        Task<GastoDTO> Crear(GastoCreateDTO gasto, int idUsuario);
+        Task<List<GastoDTO>> Listar(int idUsuario);
 
-        Task<GastoDTO> ObtenerPorId(int id);
+        Task<GastoDTO> ObtenerPorId(int id, int idUsuario);
 
-        Task Actualizar(GastoUpdateDTO gasto);
+        Task Actualizar(int id,GastoUpdateDTO gasto, int idUsuario);
 
-        Task Eliminar(int id);
+        Task Eliminar(int id, int idUsuario);
     }
 }

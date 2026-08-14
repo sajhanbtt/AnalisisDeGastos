@@ -59,11 +59,11 @@ namespace Presentacion.Controllers
         }
 
          [HttpDelete("Eliminar/{id}")]
-        public async Task<IActionResult> Eliminar([FromRoute] int id)
+        public async Task<IActionResult> Eliminar([FromRoute] int id, int? idReasignacion)
         {
             var idUsuario = ObtenerIdUsuarioActual();
 
-            await _service.Eliminar(id, idUsuario);
+            await _service.Eliminar(id, idUsuario, idReasignacion);
             return NoContent();
         }
 

@@ -17,10 +17,12 @@ namespace CapaNegocio.Services
     public class CategoriaService : ICategoriaService
     {
         private readonly IRepositorio<Categoria> _repo;
+        private readonly IRepositorio<Gasto> _repoGasto;
 
-        public CategoriaService(IRepositorio<Categoria> repo)
+        public CategoriaService(IRepositorio<Categoria> repo, IRepositorio<Gasto> repoGasto)
         {
             _repo = repo;
+            _repoGasto = repoGasto;
         }
 
         public async Task Actualizar(int id, CategoriaUpdateDTO dto, int idUsuario)
@@ -74,13 +76,37 @@ namespace CapaNegocio.Services
 
         }
 
-        public async Task Eliminar(int id, int idUsuario)
+        public async Task Eliminar(int id, int idUsuario, int? idReasignacion)
         {
             var categoria = await _repo.GetById(id);
 
             if (categoria == null || categoria.IdUsuario != idUsuario)
             {
                 throw new NotFoundException("Categoria no encontrada para eliminar");
+            }
+
+            var gastos = await _repoGasto.GetAllByUser(idUsuario);
+            var gastosAsociados = gastos.Where(x => x.IdCategoria == id);
+
+            if (gastosAsociados.Any())
+            {
+                if(idReasignacion == null)
+                {
+                    throw new ValidacionException("No se puede eliminar la tabla, tiene gastos asociados");
+                }
+
+                var categoriaNueva = await _repo.GetById(idReasignacion.Value);
+                if(categoriaNueva == null)
+                {
+                    throw new ValidacionException("Categoria nueva no valida");
+                }
+
+                foreach (var gasto in gastosAsociados)
+                {
+                    gasto.IdCategoria = idReasignacion.Value;
+                    await _repoGasto.Update(gasto); 
+                }
+
             }
 
             await _repo.Delete(categoria);
@@ -123,7 +149,7 @@ namespace CapaNegocio.Services
 
         }
 
-        public CategoriaDTO MapearADto(Categoria categoria)
+        private CategoriaDTO MapearADto(Categoria categoria)
         {
             return new CategoriaDTO
             {

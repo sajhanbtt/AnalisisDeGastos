@@ -1,59 +1,57 @@
-﻿using CapaEntidades.Models;
-using CapaNegocio.DTOs.DTOActualizacion;
+﻿using CapaNegocio.DTOs.DTOActualizacion;
 using CapaNegocio.DTOs.DTOCreacion;
 using CapaNegocio.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 using System.Security.Claims;
 
 namespace Presentacion.Controllers
 {
-    [Route("Gastos")]
+    [Route("MetodosDePago")]
     [ApiController]
     [Authorize]
-    public class GastosController : ControllerBase
+    public class MetodosDePagoController : ControllerBase
     {
-        private readonly IGastoService _service;
+        private readonly IMetodoPagoService _service;
 
-        public GastosController(IGastoService service)
+        public MetodosDePagoController(IMetodoPagoService service)
         {
             _service = service;
         }
 
         [HttpGet("Listar")]
-        public async Task <IActionResult> ListarGastos()
+        public async Task<IActionResult> Listar()
         {
             var idUsuario = ObtenerIdUsuario();
+            var metodosPago = await _service.Listar(idUsuario);
 
-            var gastos = await _service.Listar(idUsuario);
-            return Ok(gastos);
+            return Ok(metodosPago);
         }
 
         [HttpGet("ObtenerPorId/{id}")]
-        public async Task <IActionResult> ObtenerPorId([FromRoute] int id)
+        public async Task<IActionResult> ObtenerPorId([FromRoute] int id)
         {
             var idUsuario = ObtenerIdUsuario();
+            var metodoPago = await _service.ObtenerPorId(id, idUsuario);
 
-            var gasto = await _service.ObtenerPorId(id, idUsuario);
-            return Ok(gasto);
+            return Ok(metodoPago);
         }
-
         [HttpPost("Crear")]
-        public async Task<IActionResult> Crear(GastoCreateDTO dto)
+        public async Task<IActionResult> Crear(MetodoDePagoCreateDTO dto)
         {
             var idUsuario = ObtenerIdUsuario();
-            var gasto = await _service.Crear(dto, idUsuario);
+            var metodoPago = await _service.Crear(dto, idUsuario);
 
-            return CreatedAtAction(nameof(ObtenerPorId), new { id = gasto.Id}, gasto);
+            return CreatedAtAction(nameof(ObtenerPorId) new { id = metodoPago.Id }, metodoPago);
         }
 
         [HttpPut("Actualizar/{id}")]
-        public async Task<IActionResult> Actualizar([FromRoute]int id,GastoUpdateDTO dto)
+        public async Task<IActionResult> Actualizar([FromRoute] int id, MetodoDePagoUpdateDTO dto)
         {
             var idUsuario = ObtenerIdUsuario();
             await _service.Actualizar(id,dto, idUsuario);
-
             return Ok();
         }
 
@@ -70,5 +68,7 @@ namespace Presentacion.Controllers
         {
             return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         }
+
+
     }
 }
