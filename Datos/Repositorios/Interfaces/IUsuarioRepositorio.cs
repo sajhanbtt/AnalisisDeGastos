@@ -8,6 +8,10 @@ namespace CapaDatos.Repositorios.Interfaces
     public interface IUsuarioRepositorio
     {
         Task Registrar(Usuario usuario);
-        Task<Usuario> ObtenerPorCorreo(string correo); 
+        Task<Usuario> ObtenerPorCorreo(string correo);
+
+        Task<Usuario> ObtenerPorId(int id);
+
+        Task Actualizar(Usuario usuario);
     }
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http.Features;
+﻿using CapaNegocio.Excepciones;
+using Microsoft.AspNetCore.Http.Features;
+using System.Net;
 using System.Text.Json;
 
 namespace Presentacion.Middlewares
@@ -14,7 +16,7 @@ namespace Presentacion.Middlewares
             _logger = logger;
         }
 
-        public async Task InvokeAsynk(HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
             try
             {
@@ -28,29 +30,41 @@ namespace Presentacion.Middlewares
 
         }
 
-        private Task ManejarExcepcionAsync(HttpContext context, Exception ex)
+        private async Task ManejarExcepcionAsync(HttpContext context, Exception ex)
         {
             context.Response.ContentType = "application/json";
             int statusCode;
             string mensaje;
-            List<string> detalles = new();
 
-            _logger.LogError(ex, "Ocurrio un error no controlado en el servidor");
-            statusCode = StatusCodes.Status500InternalServerError;
-            mensaje = "Ha ocurrido un error interno en el servidor";
-
-            string requestId = Guid.NewGuid().ToString();
-
-            var detallesError = new
+            switch (ex)
             {
-                codigo = statusCode,
+                case ValidacionException:
+                    statusCode = (int)HttpStatusCode.BadRequest;
+                    mensaje = ex.Message;
+                    break;
+
+                case NotFoundException:
+                    statusCode = (int)HttpStatusCode.NotFound;
+                    mensaje = ex.Message;
+                    break;
+
+                default:
+                    statusCode = (int)HttpStatusCode.InternalServerError;
+                    mensaje = "Ocurrió un error inesperado en el servidor.";
+                    break;
+            }
+
+            context.Response.StatusCode = statusCode;
+
+            var respuesta = new
+            {
+                error = true,
                 mensaje = mensaje,
-                detalles = detalles,
-                requestId = requestId
+                codigo = statusCode
             };
 
-            return context.Response.WriteAsJsonAsync(JsonSerializer.Serialize(detallesError));
-
+            var json = JsonSerializer.Serialize(respuesta);
+            await context.Response.WriteAsync(json);
         }
     }
 }

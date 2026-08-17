@@ -1,6 +1,7 @@
 ﻿using CapaNegocio.DTOs.DTOActualizacion;
 using CapaNegocio.DTOs.DTOCreacion;
 using CapaNegocio.DTOs.DTOLectura;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,5 +18,9 @@ namespace CapaNegocio.Interfaces
         Task Actualizar(int id,GastoUpdateDTO gasto, int idUsuario);
 
         Task Eliminar(int id, int idUsuario);
+
+        Task<ImportacionDTO> ImportarArchivo(IFormFile archivo, int idUsuario);
+
+        Task<ReporteDTO> ObtenerReporteMensual(int mes, int anio, int idUsuario);
     }
 }

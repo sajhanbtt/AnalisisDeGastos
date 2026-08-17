@@ -20,5 +20,9 @@ namespace CapaNegocio.DTOs.DTOLectura
 
         public string NombreCategoria { get; set; }
 
+        public decimal GastoAcumulado { get; set; }
+        public decimal PorcentajeConsumido { get; set; }
+        public string Alerta { get; set; }
+
     }
 }

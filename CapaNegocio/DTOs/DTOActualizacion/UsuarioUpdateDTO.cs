@@ -10,7 +10,7 @@ namespace CapaNegocio.DTOs.DTOActualizacion
         [Required]
         [StringLength(50)]
         public string Nombre { get; set; }
-        [Required]
+
         [StringLength(255)]
         public string Clave { get; set; }
     }

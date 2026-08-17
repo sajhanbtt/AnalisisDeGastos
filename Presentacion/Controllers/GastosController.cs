@@ -15,10 +15,12 @@ namespace Presentacion.Controllers
     public class GastosController : ControllerBase
     {
         private readonly IGastoService _service;
+        private readonly IExportacionService _exportacionService;
 
-        public GastosController(IGastoService service)
+        public GastosController(IGastoService service, IExportacionService exportacionService)
         {
             _service = service;
+            _exportacionService = exportacionService;
         }
 
         [HttpGet("Listar")]
@@ -48,6 +50,15 @@ namespace Presentacion.Controllers
             return CreatedAtAction(nameof(ObtenerPorId), new { id = gasto.Id}, gasto);
         }
 
+        [HttpPost("ImportarArchivo")]
+        public async Task<IActionResult> ImportarArchivo(IFormFile archivo)
+        {
+            var idUsuario = ObtenerIdUsuario();
+            await _service.ImportarArchivo(archivo, idUsuario);
+
+            return Ok();
+        }
+
         [HttpPut("Actualizar/{id}")]
         public async Task<IActionResult> Actualizar([FromRoute]int id,GastoUpdateDTO dto)
         {
@@ -66,6 +77,15 @@ namespace Presentacion.Controllers
             return NoContent();
         }
 
+        [HttpGet("Exportar")]
+        public async Task<IActionResult> Exportar(int mes, int anio, [FromQuery] string formato)
+        {
+            var idUsuario = ObtenerIdUsuario();
+            var reporte = await _service.ObtenerReporteMensual(mes, anio, idUsuario);
+            var archivo = _exportacionService.Exportar(reporte, formato);
+
+            return File(archivo, "application/octet-stream", $"reporte.{formato}");
+        }
         private int ObtenerIdUsuario()
         {
             return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);

@@ -5,6 +5,8 @@ using CapaNegocio.DTOs.DTOCreacion;
 using CapaNegocio.DTOs.DTOLectura;
 using CapaNegocio.Excepciones;
 using CapaNegocio.Interfaces;
+using ClosedXML.Excel;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,11 +15,11 @@ namespace CapaNegocio.Services
 {
     public class GastoService : IGastoService
     {
-        private readonly IRepositorio<Gasto> _repo;
+        private readonly IGastoRepositorio _repo;
         private readonly IRepositorio<Categoria> _repoCategoria;
         private readonly IRepositorio<MetodoDePago> _repoMetodoPago;
 
-        public GastoService(IRepositorio<Gasto> repo, IRepositorio<Categoria> repoCategoria, IRepositorio<MetodoDePago> repoMetodoPago)
+        public GastoService(IGastoRepositorio repo, IRepositorio<Categoria> repoCategoria, IRepositorio<MetodoDePago> repoMetodoPago)
         {
             _repo = repo;
             _repoCategoria= repoCategoria;
@@ -144,6 +146,124 @@ namespace CapaNegocio.Services
 
             return MapearADto(gasto, categoria, metodoPago);
         }
+
+        public async Task<ImportacionDTO> ImportarArchivo(IFormFile archivo, int idUsuario)
+        {
+            if (archivo == null || archivo.Length == 0)
+                throw new ValidacionException("El archivo está vacío o no es válido.");
+
+            var categorias = await _repoCategoria.GetAllByUser(idUsuario);
+            var metodosPago = await _repoMetodoPago.GetAllByUser(idUsuario);
+
+            var gastosValidos = new List<Gasto>();
+            var errores = new List<string>();
+
+            using var stream = archivo.OpenReadStream();
+            using var workbook = new XLWorkbook(stream);
+            var filas = workbook.Worksheet(1).RowsUsed().Skip(1);
+
+            foreach (var fila in filas)
+            {
+                int numeroFila = fila.RowNumber();
+
+                bool montoValido = decimal.TryParse(fila.Cell(2).GetValue<string>(), out decimal monto);
+                if (!montoValido || monto <= 0)
+                {
+                    errores.Add($"Fila {numeroFila}: monto inválido");
+                    continue;
+                }
+
+                string nombreCategoria = fila.Cell(3).GetValue<string>().Trim();
+                var categoria = categorias.FirstOrDefault(c => c.NombreCategoria.Equals(nombreCategoria, StringComparison.OrdinalIgnoreCase));
+                if (categoria == null)
+                {
+                    errores.Add($"Fila {numeroFila}: categoría '{nombreCategoria}' no encontrada");
+                    continue;
+                }
+
+                string nombreMetodo = fila.Cell(4).GetValue<string>().Trim();
+                var metodo = metodosPago.FirstOrDefault(m => m.NombreMetodo.Equals(nombreMetodo, StringComparison.OrdinalIgnoreCase));
+                if (metodo == null)
+                {
+                    errores.Add($"Fila {numeroFila}: método de pago '{nombreMetodo}' no encontrado");
+                    continue;
+                }
+
+                gastosValidos.Add(new Gasto
+                {
+                    Descripcion = fila.Cell(1).GetValue<string>(),
+                    Monto = monto,
+                    IdCategoria = categoria.Id,
+                    IdMetodoPago = metodo.Id,
+                    Fecha = DateTime.Now,
+                    IdUsuario = idUsuario
+                });
+            }
+
+            if (gastosValidos.Count > 0) await _repo.InsertMasivo(gastosValidos);
+
+            return new ImportacionDTO
+            {
+                FilasExitosas = gastosValidos.Count,
+                Errores = errores
+            };
+        }
+        public async Task<ReporteDTO> ObtenerReporteMensual(int mes, int anio, int idUsuario)
+        {
+            if (mes < 1 || mes > 12)
+                throw new ValidacionException("Mes inválido");
+
+            if (anio < 2000 || anio > DateTime.Now.Year)
+                throw new ValidacionException("Año inválido");
+
+            var todosLosGastos = await _repo.GetAllByUser(idUsuario);
+            var categorias = await _repoCategoria.GetAllByUser(idUsuario);
+
+            var gastosDelMes = todosLosGastos
+                .Where(g => g.Fecha.Month == mes && g.Fecha.Year == anio)
+                .ToList();
+
+            int mesAnterior = mes - 1;
+            int anioAnterior = anio;
+            if (mesAnterior == 0)
+            {
+                mesAnterior = 12;
+                anioAnterior = anio - 1;
+            }
+
+            var gastosDelMesAnterior = todosLosGastos
+                .Where(g => g.Fecha.Month == mesAnterior && g.Fecha.Year == anioAnterior)
+                .ToList();
+
+            decimal totalGastado = gastosDelMes.Sum(g => g.Monto);
+            decimal totalMesAnterior = gastosDelMesAnterior.Sum(g => g.Monto);
+
+            var desglose = gastosDelMes
+                .GroupBy(g => g.IdCategoria)
+                .Select(grupo => new DesgloseCategoriaDTO
+                {
+                    NombreCategoria = categorias.First(c => c.Id == grupo.Key).NombreCategoria,
+                    MontoTotal = grupo.Sum(g => g.Monto)
+                })
+                .ToList();
+
+            var topCategorias = desglose
+                .OrderByDescending(d => d.MontoTotal)
+                .Take(3)
+                .ToList();
+
+            return new ReporteDTO
+            {
+                Mes = mes,
+                Anio = anio,
+                TotalGastado = totalGastado,
+                TotalMesAnterior = totalMesAnterior,
+                DiferenciaConMesAnterior = totalGastado - totalMesAnterior,
+                DesglosePorCategoria = desglose,
+                TopCategorias = topCategorias
+            };
+        }
+
 
         private GastoDTO MapearADto(Gasto gasto, Categoria categoria, MetodoDePago metodoPago)
         {

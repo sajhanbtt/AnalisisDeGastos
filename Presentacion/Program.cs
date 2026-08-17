@@ -7,6 +7,7 @@ using CapaNegocio.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Presentacion.Middlewares;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -52,13 +53,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirTodo", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddScoped(typeof(IRepositorio<>),typeof(Repository<>));
-builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+builder.Services.AddScoped<IGastoRepositorio, GastoRepositorio>();
 builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
 builder.Services.AddScoped<IGastoService, GastoService>();
+builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IMetodoPagoService, MetodoDePagoService>();
 builder.Services.AddScoped<IPresupuestoService, PresupuestoService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IExportacionService, ExportacionService>();
 
 var app = builder.Build();
 
@@ -67,7 +82,11 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseMiddleware<ManejoDeExcepcionesMiddleware>();
+
 app.UseHttpsRedirection();
+
+app.UseCors("PermitirTodo");
 
 app.UseAuthentication();
 

@@ -1,4 +1,5 @@
-﻿using CapaNegocio.DTOs.DTOActualizacion;
+﻿using CapaEntidades.Models;
+using CapaNegocio.DTOs.DTOActualizacion;
 using CapaNegocio.DTOs.DTOCreacion;
 using CapaNegocio.DTOs.DTOLectura;
 using System;
@@ -9,13 +10,14 @@ namespace CapaNegocio.Interfaces
 {
     public interface IPresupuestoService
     {
-        Task Crear(PresupuestoCreateDTO presupuesto);
-        Task<List<PresupuestoDTO>> Listar();
+        Task<PresupuestoDTO> Crear(PresupuestoCreateDTO presupuesto, int idUsuario);
+        Task<List<PresupuestoDTO>> Listar(int idUsuario);
 
-        Task<PresupuestoDTO> ObtenerPorId(int id);
+        Task<PresupuestoDTO> ObtenerPorId(int id, int idUsuario);
 
-        Task Actualizar(PresupuestoUpdateDTO presupuesto);
+        Task Actualizar(int id,PresupuestoUpdateDTO presupuesto, int idUsuario);
 
-        Task Eliminar(int id);
+        Task Eliminar(int id, int idUsuario);
     }
 }
+

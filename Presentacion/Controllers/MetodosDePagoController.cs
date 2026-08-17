@@ -44,7 +44,7 @@ namespace Presentacion.Controllers
             var idUsuario = ObtenerIdUsuario();
             var metodoPago = await _service.Crear(dto, idUsuario);
 
-            return CreatedAtAction(nameof(ObtenerPorId) new { id = metodoPago.Id }, metodoPago);
+            return CreatedAtAction(nameof(ObtenerPorId), new { id = metodoPago.Id }, metodoPago);
         }
 
         [HttpPut("Actualizar/{id}")]
